@@ -80,7 +80,7 @@ The SAM CLI reads the application template to determine the API's routes and the
 
 ```yaml
       Events:
-        HelloWorld:
+        NACA4Airfoil:
           Type: Api
           Properties:
             Path: /hello
