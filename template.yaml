@@ -20,15 +20,30 @@ Resources:
     Properties:
       CodeUri: NACA4Airfoil/lambda/
       Handler: app.lambda_handler
-      Runtime: python3.8
+      Layers:
+        - !Ref NACA4AirfoilLayer
+      Runtime: python3.11
       Architectures:
       - x86_64
+      Timeout: 10
       Events:
         NACA4Airfoil:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /NACA4Airfoil
             Method: get
+  NACA4AirfoilLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: naca-dependencies
+      Description: Dependencies for sam app [temp-units-conv]
+      ContentUri: naca_layer/
+      CompatibleRuntimes:
+        - python3.11
+      LicenseInfo: 'MIT'
+      RetentionPolicy: Retain
+    Metadata:
+      BuildMethod: python3.11
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
