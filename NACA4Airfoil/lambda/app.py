@@ -8,7 +8,7 @@ def lambda_handler(event, context):
     m = event['m']
     p = event['p']
     t = event['t']
-
+    n = event['n']
     
     showPlot = False
     
