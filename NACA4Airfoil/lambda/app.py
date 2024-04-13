@@ -14,7 +14,7 @@ def lambda_handler(event, context):
         p = json_body['maxCamberLoc']
         t = json_body['maxThickness']
         n = json_body['numPoints']
-            
+        
         m = m/100
         p = p/10
         t = t/100
