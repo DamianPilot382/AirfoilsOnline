@@ -1,8 +1,12 @@
 print("BONK")
 
-import json
-import numpy as np
-import pandas as pd
+try:
+    import json
+    import numpy as np
+    import pandas as pd
+except Exception as e:
+    print("Failed to import libraries")
+    print(str(e))
 
 def lambda_handler(event, context):
     try:
