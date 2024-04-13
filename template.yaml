@@ -21,7 +21,7 @@ Resources:
       CodeUri: NACA4Airfoil/lambda/
       Handler: app.lambda_handler
       Layers:
-        - !Ref NACA4AirfoilLayer
+        # - !Ref NACA4AirfoilLayer
       Runtime: python3.11
       Architectures:
       - x86_64
