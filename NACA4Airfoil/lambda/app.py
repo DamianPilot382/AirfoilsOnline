@@ -1,42 +1,74 @@
 import json
-
-# import requests
-
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
 
 def lambda_handler(event, context):
-    """Sample pure Lambda function
+    
+    m = event['m']
+    p = event['p']
+    t = event['t']
 
-    Parameters
-    ----------
-    event: dict, required
-        API Gateway Lambda Proxy Input Format
-
-        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
-
-    context: object, required
-        Lambda Context runtime methods and attributes
-
-        Context doc: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
-
-    Returns
-    ------
-    API Gateway Lambda Proxy Output Format: dict
-
-        Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
-    """
-
-    # try:
-    #     ip = requests.get("http://checkip.amazonaws.com/")
-    # except requests.RequestException as e:
-    #     # Send some context about this error to Lambda Logs
-    #     print(e)
-
-    #     raise e
-
+    
+    showPlot = False
+    
+    m = m/100
+    p = p/10
+    t = t/100
+    
+    # Define the x-coordinates of the mean camber line points\
+    # and the thickness distribution
+    x = np.linspace(0,1,n)
+    yt = 5*t*(0.2969*np.sqrt(x)-0.1260*x-0.3516*x**2+0.2843*x**3-0.1015*x**4)
+    
+    xu = np.linspace(0,1,n)
+    yu = np.linspace(0,1,n)
+    xl = np.linspace(0,1,n)
+    yl = np.linspace(0,1,n)
+    
+    i = 0
+    
+    while i < x.size:
+        if x[i] < p:
+            yc = m/p**2*(2*p*x[i]-x[i]**2)
+            der = 2*m/p**2*(p-x[i])
+        else:
+            yc = m/(1-p)**2*((1-2*p)+2*p*x[i]-x[i]**2)
+            der = 2*m/(1-p)**2*(p-x[i])
+            
+        theta = np.arctan(der)
+        
+        xu[i] = x[i]-yt[i]*np.sin(theta)
+        yu[i] = yc+yt[i]*np.cos(theta)
+        xl[i] = x[i]+yt[i]*np.sin(theta)
+        yl[i] = yc-yt[i]*np.cos(theta)
+        
+        i += 1
+    
+    if showPlot:
+        plt.plot(xu, yu)
+        plt.plot(xl, yl)
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.title('Airfoil')
+        plt.grid(True)
+        ax = plt.gca()
+        ax.set_xlim([0, 1])
+        ax.set_ylim([-0.5, 0.5])       
+        plt.show()        
+        
+    xu = np.flip(xu)
+    yu = np.flip(yu)
+    
+    x = np.append(xu, xl)
+    y = np.append(yu, yl)
+    
+    datapoints = pd.DataFrame({'x': x, 'y': y})
+        
     return {
         "statusCode": 200,
         "body": json.dumps({
             "message": "hello world",
-            # "location": ip.text.replace("\n", "")
+            "datapoints": datapoints.to_json(orient='records')
         }),
     }
