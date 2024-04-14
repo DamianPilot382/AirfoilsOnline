@@ -5,18 +5,56 @@ Description: >
 
   Sample SAM Template for airfoils-online
 
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
+
   Function:
     Timeout: 10
     MemorySize: 250
-
-    # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
     LoggingConfig:
       LogFormat: JSON
+
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,OPTIONS'"
+      AllowHeaders: "'Content-Type'"
+      AllowOrigin: "'*'"
+
 Resources:
+
+  NACA4CachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        DefaultTTL: 3600
+        MaxTTL: 86400
+        MinTTL: 0
+        Name: NACA4CachePolicy
+        ParametersInCacheKeyAndForwardedToOrigin:
+          CookiesConfig:
+            CookieBehavior: none
+          HeadersConfig:
+            HeaderBehavior: none
+          QueryStringsConfig:
+            QueryStringBehavior: none
+          EnableAcceptEncodingGzip: true
+
+  AirfoilsOnlineApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      AlwaysDeploy: true
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
+      StageName: Prod
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: ./api.yaml
+
   NACA4AirfoilFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
       Events:
@@ -25,21 +63,73 @@ Resources:
           Properties:
             Path: /NACA4Airfoil
             Method: get
+            RestApiId: !Ref AirfoilsOnlineApi
     Metadata:
       DockerTag: python3.11
       DockerContext: NACA4Airfoil/
       Dockerfile: Dockerfile
 
+  ApiGatewayRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - apigateway.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: !Sub ${AWS::StackName}-lambda-invoke
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - !GetAtt NACA4AirfoilFunction.Arn
+
+  CloudfrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+          - DomainName: !Sub "${AirfoilsOnlineApi}.execute-api.${AWS::Region}.amazonaws.com"
+            Id: ApiOrigin
+            CustomOriginConfig:
+              HTTPPort: 80
+              HTTPSPort: 443
+              OriginProtocolPolicy: https-only
+        Enabled: true
+        DefaultCacheBehavior:
+          TargetOriginId: ApiOrigin
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: !Ref NACA4CachePolicy
+
+  AirfoilsOnlineApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref NACA4AirfoilFunction
+      Principal: "apigateway.amazonaws.com"
+
 Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+
   NACA4AirfoilApi:
     Description: API Gateway endpoint URL for Prod stage for Hello World function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/NACA4Airfoil/"
+    Value: !Sub "https://${AirfoilsOnlineApi}.execute-api.${AWS::Region}.amazonaws.com/NACA4Airfoil/"
+    
   NACA4AirfoilFunction:
     Description: Hello World Lambda Function ARN
     Value: !GetAtt NACA4AirfoilFunction.Arn
+
   NACA4AirfoilFunctionIamRole:
     Description: Implicit IAM Role created for Hello World function
     Value: !GetAtt NACA4AirfoilFunctionRole.Arn
+
+  WebEndpoint:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${AirfoilsOnlineApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

@@ -1,23 +1,17 @@
 print("BONK")
 
-try:
-    import json
-    import numpy as np
-    import pandas as pd
-except Exception as e:
-    print("Failed to import libraries")
-    print(str(e))
+import json
+import numpy as np
+import pandas as pd
 
 def lambda_handler(event, context):
+    
     try:
-        print("HERE")
-        
-        json_body = json.loads(event['body'])
-        
-        m = json_body['maxCamber']
-        p = json_body['maxCamberLoc']
-        t = json_body['maxThickness']
-        n = json_body['numPoints']
+        body = json.loads(event['body'])
+        m = body['maxCamber']
+        p = body['maxCamberLoc']
+        t = body['maxThickness']
+        n = body['numPoints']
         
         m = m/100
         p = p/10
@@ -59,20 +53,19 @@ def lambda_handler(event, context):
         y = np.append(yu, yl)
         
         datapoints = pd.DataFrame({'x': x, 'y': y})
-        
-        print(datapoints)
-        
+                
         return {
             "statusCode": 200,
-            "body": json.dumps({
-                "dataPoints": datapoints.to_json(orient='records')
-            }),
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': '*'
+            },
+            "body": datapoints.to_json(orient='records')
         }
         
     except Exception as e:
         return {
             "statusCode": 500,
-            "body": json.dumps({
-                "error": str(e)
-            }),
+            "body": str(e)
         }
