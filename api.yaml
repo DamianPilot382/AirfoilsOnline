@@ -37,7 +37,7 @@ paths:
         - CORS
       x-amazon-apigateway-integration:
         type: mock
-        requestTemplates: "{\"statusCode\": 200}"
+        requestTemplates: {"statusCode": 200}
         responses:
           "default":
             statusCode: 200

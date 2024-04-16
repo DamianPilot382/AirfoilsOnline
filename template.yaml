@@ -15,8 +15,8 @@ Globals:
 
   Api:
     Cors:
-      AllowMethods: "'GET,POST,OPTIONS'"
-      AllowHeaders: "'Content-Type'"
+      AllowMethods: "'*'"
+      AllowHeaders: "'*'"
       AllowOrigin: "'*'"
 
 Resources:
