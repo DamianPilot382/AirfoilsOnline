@@ -1,60 +1,62 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
-  version: '1.0'
-  title: airfoils-online
-host: ${staveVariables.RestApiId}.execute-api.us-west-1.amazonaws.com
+  version: "1.0"
+  title: "airfoils-online"
+host: "${staveVariables.RestApiId}.execute-api.us-west-1.amazonaws.com"
 basePath: "/Prod"
 schemes:
-- https
+- "https"
 paths:
-  "/NACA4Airfoil":
+  /NACA4Airfoil:
     post:
       responses:
-        200:
-          description: "Success"
+        "200":
+          description: "200 response"
           headers:
-            Access-Control-Allow-Headers:
+            Access-Control-Allow-Origin:
               type: "string"
             Access-Control-Allow-Methods:
               type: "string"
-            Access-Control-Allow-Origin:
+            Access-Control-Allow-Headers:
               type: "string"
       x-amazon-apigateway-integration:
-        type: aws_proxy
-        httpMethod: POST
-        uri: 
-          Fn::Sub: arn:aws:apigateway:us-west-1:lambda:path/2015-03-31/functions/${NACA4AirfoilFunction.Arn}/invocations
-        passthroughBehavior: when_no_match
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:us-west-1:lambda:path/2015-03-31/functions/${NACA4AirfoilFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
     options:
-      summary: CORS support
-      description: |
-        Enable CORS by returning correct headers
       consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      tags:
-        - CORS
-      x-amazon-apigateway-integration:
-        type: mock
-        requestTemplates: {"statusCode": 200}
-        responses:
-          "default":
-            statusCode: 200
-            responseParameters:
-              method.response.header.Access-Control-Allow-Headers : "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
-              method.response.header.Access-Control-Allow-Methods : "'*'"
-              method.response.header.Access-Control-Allow-Origin : "'*'"
-            responseTemplates:
-              application/json: |
-                {}
+      - "application/json"
       responses:
-        200:
-          description: Default response for CORS method
+        "200":
+          description: "200 response"
           headers:
-            Access-Control-Allow-Headers:
+            Access-Control-Allow-Origin:
               type: "string"
             Access-Control-Allow-Methods:
               type: "string"
-            Access-Control-Allow-Origin:
+            Access-Control-Allow-Headers:
               type: "string"
+      x-amazon-apigateway-integration:
+        type: "mock"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,POST'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+x-amazon-apigateway-gateway-responses:
+  DEFAULT_4XX:
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Methods: "'OPTIONS,POST'"
+      gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+      gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+  DEFAULT_5XX:
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Methods: "'OPTIONS,POST'"
+      gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+      gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
