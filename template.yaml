@@ -8,7 +8,7 @@ Description: >
 Globals:
 
   Function:
-    Timeout: 10
+    Timeout: 15
     MemorySize: 250
     LoggingConfig:
       LogFormat: JSON
