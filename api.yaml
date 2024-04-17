@@ -22,7 +22,8 @@ paths:
       x-amazon-apigateway-integration:
         type: "aws_proxy"
         httpMethod: "POST"
-        uri: "arn:aws:apigateway:us-west-1:lambda:path/2015-03-31/functions/${NACA4AirfoilFunction.Arn}/invocations"
+        uri: 
+          Fn::Sub: arn:aws:apigateway:us-west-1:lambda:path/2015-03-31/functions/${NACA4AirfoilFunction.Arn}/invocations
         passthroughBehavior: "when_no_match"
     options:
       consumes:
