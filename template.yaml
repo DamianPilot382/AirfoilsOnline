@@ -62,11 +62,27 @@ Resources:
           Type: Api
           Properties:
             Path: /NACA4Airfoil
-            Method: get
+            Method: post
             RestApiId: !Ref AirfoilsOnlineApi
     Metadata:
       DockerTag: python3.11
       DockerContext: NACA4Airfoil/
+      Dockerfile: Dockerfile
+
+  SolverFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Events:
+        NACA4Airfoil:
+          Type: Api
+          Properties:
+            Path: /Solver
+            Method: post
+            RestApiId: !Ref AirfoilsOnlineApi
+    Metadata:
+      DockerTag: python3.11
+      DockerContext: Solver/
       Dockerfile: Dockerfile
 
   ApiGatewayRole:
@@ -91,6 +107,7 @@ Resources:
                   - lambda:InvokeFunction
                 Resource:
                   - !GetAtt NACA4AirfoilFunction.Arn
+                  - !GetAtt SolverFunction.Arn
 
   CloudfrontDistribution:
     Type: AWS::CloudFront::Distribution
@@ -109,11 +126,18 @@ Resources:
           ViewerProtocolPolicy: redirect-to-https
           CachePolicyId: !Ref NACA4CachePolicy
 
-  AirfoilsOnlineApiPermission:
+  NACA4AirfoilFunctionApiPermission:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !Ref NACA4AirfoilFunction
+      Principal: "apigateway.amazonaws.com"
+
+  SolverFunctionApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref SolverFunction
       Principal: "apigateway.amazonaws.com"
 
 Outputs:
