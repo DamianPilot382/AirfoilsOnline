@@ -1,4 +1,4 @@
-print("BONK")
+print("BONKERS")
 
 import json
 import numpy as np
@@ -14,8 +14,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 np.seterr('raise')
 import pandas as pd
-
-from scipy import interpolate
 
 import base64
 import io
@@ -483,7 +481,21 @@ def compute(Vinf, AoA, dataBuffer):
 
 
 def lambda_handler(event, context):
+    
+    # return {
+    #     "statusCode": 200,
+    #     'headers': {
+    #         'Access-Control-Allow-Headers': '*',
+    #         'Access-Control-Allow-Origin': '*',
+    #         'Access-Control-Allow-Methods': '*'
+    #     },
+    #     "body": "Doge Wow"
+    # }
+    
     try:
+        
+        print(event['body'])
+        
         body = json.loads(event['body'])
         vinf = body['vinf']
         aoa = body['aoa']
@@ -491,6 +503,15 @@ def lambda_handler(event, context):
         
         text, panel_geometry, geom_pts, control_pts, pressure, pressureCoeff = compute(vinf, aoa, dataBuffer)
 
+
+        bodyRet = {
+            'text': text,
+            'panel_geometry': panel_geometry,
+            'geom_pts': geom_pts,
+            'control_pts': control_pts,
+            'pressure': pressure,
+            'pressureCoeff': pressureCoeff
+        }
         
         return {
             "statusCode": 200,
@@ -499,18 +520,16 @@ def lambda_handler(event, context):
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': '*'
             },
-            "body": {
-                'text': text,
-                'panel_geometry': panel_geometry,
-                'geom_pts': geom_pts,
-                'control_pts': control_pts,
-                'pressure': pressure,
-                'pressureCoeff': pressureCoeff
-            }
+            "body": json.dumps(bodyRet)
         }
 
     except Exception as e:
         return {
             "statusCode": 500,
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': '*'
+            },
             "body": str(e)
         }

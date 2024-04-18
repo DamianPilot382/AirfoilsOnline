@@ -67,5 +67,10 @@ def lambda_handler(event, context):
     except Exception as e:
         return {
             "statusCode": 500,
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': '*'
+            },
             "body": str(e)
         }
