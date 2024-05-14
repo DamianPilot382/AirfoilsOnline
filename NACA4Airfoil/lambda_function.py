@@ -1,5 +1,3 @@
-print("BONK")
-
 import json
 import numpy as np
 import pandas as pd
@@ -49,8 +47,9 @@ def lambda_handler(event, context):
         xu = np.flip(xu)
         yu = np.flip(yu)
         
-        x = np.append(xu, xl)
-        y = np.append(yu, yl)
+        # Delete to remove the duplicate x: 0, y: 0 point
+        x = np.append(np.delete(xu, -1), xl)
+        y = np.append(np.delete(yu, -1), yl)
         
         datapoints = pd.DataFrame({'x': x, 'y': y})
                 

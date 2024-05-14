@@ -5,7 +5,7 @@ Upload and get the party started
 Test:
 ```bash
 sam build --use-container
-sam local start-lambda
+sam local start-api
 ```
 
 Deploy:

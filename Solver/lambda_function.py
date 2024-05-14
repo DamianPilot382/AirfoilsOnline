@@ -1,5 +1,3 @@
-print("BONKERS")
-
 import json
 import numpy as np
 import pandas as pd
@@ -482,19 +480,7 @@ def compute(Vinf, AoA, dataBuffer):
 
 def lambda_handler(event, context):
     
-    # return {
-    #     "statusCode": 200,
-    #     'headers': {
-    #         'Access-Control-Allow-Headers': '*',
-    #         'Access-Control-Allow-Origin': '*',
-    #         'Access-Control-Allow-Methods': '*'
-    #     },
-    #     "body": "Doge Wow"
-    # }
-    
     try:
-        
-        print(event['body'])
         
         body = json.loads(event['body'])
         vinf = body['vinf']
@@ -512,7 +498,7 @@ def lambda_handler(event, context):
             'pressure': pressure,
             'pressureCoeff': pressureCoeff
         }
-        
+                
         return {
             "statusCode": 200,
             'headers': {
@@ -524,6 +510,7 @@ def lambda_handler(event, context):
         }
 
     except Exception as e:
+        print("ERROR")
         return {
             "statusCode": 500,
             'headers': {
