@@ -311,6 +311,10 @@ def compute(Vinf, AoA, dataBuffer):
     text_output += "  K-J  : %2.8f\n" % (2*sum(gamma*S))
     text_output += "Moment Coefficient (CM)\n"
     text_output += "  SPVP : %2.8f\n" % CM
+    
+    Cl_SPVP = CL
+    Cl_KJ = 2*sum(gamma*S)
+    Cm_SPVP = CM
 
 
     # %% PLOTTING
@@ -477,7 +481,7 @@ def compute(Vinf, AoA, dataBuffer):
                      "lower": pd.DataFrame({'x': pressureCoeff["lower_x"],
                                             'y': pressureCoeff['lower_y']}).to_json(orient='records')}
     
-    return text_output, panel_geometry, geom_pts, control_pts, pressure, pressureCoeff
+    return text_output, panel_geometry, geom_pts, control_pts, pressure, pressureCoeff, Cl_SPVP, Cl_KJ, Cm_SPVP
 
 
 def lambda_handler(event, context):
@@ -489,7 +493,7 @@ def lambda_handler(event, context):
         aoa = float(body['aoa'])
         dataBuffer = body['airfoilData']
         
-        text, panel_geometry, geom_pts, control_pts, pressure, pressureCoeff = compute(vinf, aoa, dataBuffer)
+        text, panel_geometry, geom_pts, control_pts, pressure, pressureCoeff, Cl_SPVP, Cl_KJ, Cm_SPVP = compute(vinf, aoa, dataBuffer)
 
 
         bodyRet = {
@@ -498,7 +502,10 @@ def lambda_handler(event, context):
             'geom_pts': geom_pts,
             'control_pts': control_pts,
             'pressure': pressure,
-            'pressureCoeff': pressureCoeff
+            'pressureCoeff': pressureCoeff,
+            'Cl_SPVP': Cl_SPVP,
+            'Cl_KJ': Cl_KJ,
+            'Cm_SPVP': Cm_SPVP
         }
                 
         return {
