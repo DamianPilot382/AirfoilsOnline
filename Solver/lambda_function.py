@@ -1,3 +1,5 @@
+import traceback
+
 import json
 import numpy as np
 import pandas as pd
@@ -483,8 +485,8 @@ def lambda_handler(event, context):
     try:
         
         body = json.loads(event['body'])
-        vinf = body['vinf']
-        aoa = body['aoa']
+        vinf = float(body['vinf'])
+        aoa = float(body['aoa'])
         dataBuffer = body['airfoilData']
         
         text, panel_geometry, geom_pts, control_pts, pressure, pressureCoeff = compute(vinf, aoa, dataBuffer)
@@ -511,6 +513,8 @@ def lambda_handler(event, context):
 
     except Exception as e:
         print("ERROR")
+        # print(e)
+        print(traceback.format_exc())
         return {
             "statusCode": 500,
             'headers': {
